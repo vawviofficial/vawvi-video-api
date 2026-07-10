@@ -1,7 +1,3 @@
-Flask==3.0.3
-Flask-Cors==4.0.1
-yt-dlp==2024.5.27
-gunicorn==22.0.0
 ydl_opts = {
     'format': 'best',  # Simplify to 'best' to let yt-dlp choose the most compatible stream
     'quiet': True,
