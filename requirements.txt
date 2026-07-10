@@ -2,3 +2,10 @@ Flask==3.0.3
 Flask-Cors==4.0.1
 yt-dlp==2024.5.27
 gunicorn==22.0.0
+ydl_opts = {
+    'format': 'best',  # Simplify to 'best' to let yt-dlp choose the most compatible stream
+    'quiet': True,
+    'no_warnings': True,
+    'skip_download': True,
+    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+}
