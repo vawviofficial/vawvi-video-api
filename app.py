@@ -3,8 +3,7 @@ from flask_cors import CORS
 import yt_dlp
 
 app = Flask(__name__)
-# Enable CORS so your frontend can call this API even if hosted on a different domain
-CORS(app) 
+CORS(app)
 
 @app.route('/api/extract', methods=['GET'])
 def extract_video_info():
@@ -13,46 +12,33 @@ def extract_video_info():
     if not video_url:
         return jsonify({"success": False, "error": "No URL provided"}), 400
 
-    # Configure yt-dlp to extract information without downloading
+    # Facebook/Insta ke liye best settings
     ydl_opts = {
-        'format': 'best[ext=mp4]/best', # Prioritize mp4 formats
+        'format': 'best',
         'quiet': True,
         'no_warnings': True,
-        'skip_download': True, # Crucial: Don't download the video to the server
+        'skip_download': True,
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # Info extract karo
             info_dict = ydl.extract_info(video_url, download=False)
             
-            # If the URL is a playlist, grab the first video
+            # Agar URL ek playlist/reel hai, toh main video object lo
             if 'entries' in info_dict:
                 info_dict = info_dict['entries'][0]
 
-            # Extract the required fields
-            title = info_dict.get('title', 'Unknown Title')
-            thumbnail = info_dict.get('thumbnail', '')
-            direct_link = info_dict.get('url', '')
-
-            if not direct_link:
-                return jsonify({"success": False, "error": "Could not extract a direct media link."}), 400
-
             return jsonify({
                 "success": True,
-                "title": title,
-                "thumbnail": thumbnail,
-                "direct_link": direct_link
+                "title": info_dict.get('title', 'Facebook/Insta Video'),
+                "thumbnail": info_dict.get('thumbnail', ''),
+                "direct_link": info_dict.get('url', '')
             })
 
-    except yt_dlp.utils.DownloadError as e:
-        # Handle specific yt-dlp errors (e.g., private video, unsupported site)
-        error_msg = str(e).replace('\x1b[0;31mERROR:\x1b[0m ', '') # Clean up CLI color codes
-        return jsonify({"success": False, "error": error_msg}), 400
-        
     except Exception as e:
-        # Catch-all for other server errors
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": "Video formats not found or link is private."}), 400
 
-# For local testing
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True)
