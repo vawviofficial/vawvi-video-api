@@ -4,9 +4,8 @@ from flask_cors import CORS
 import yt_dlp
 
 app = Flask(__name__)
-CORS(app) # Yeh frontend ko block hone se bachayega
+CORS(app)
 
-# API Route jo video extract karega
 @app.route('/api/extract', methods=['GET'])
 def extract_link():
     video_url = request.args.get('url')
@@ -20,22 +19,22 @@ def extract_link():
             info = ydl.extract_info(video_url, download=False)
             
             direct_url = info.get('url')
-            title = info.get('title')
+            title = info.get('title', 'Downloaded Video')
+            thumbnail = info.get('thumbnail', '') # Thumbnail nikalne ka logic add kiya
             
             return jsonify({
                 "success": True,
                 "title": title,
-                "direct_link": direct_url
+                "direct_link": direct_url,
+                "thumbnail": thumbnail
             })
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-# Test karne ke liye ek simple home route
 @app.route('/', methods=['GET'])
 def home():
     return "Vawvi Video API is running perfectly!"
 
 if __name__ == '__main__':
-    # Render automatic port assign karta hai, uske liye ye logic zaroori hai
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
